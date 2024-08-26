@@ -1,5 +1,7 @@
 import fetch from "node-fetch";
 import fs from "fs";
+import { v4 as uuidv4 } from "uuid";
+
 export function config(bot) {
   bot.hears("Сделать конфиг", async (ctx) => {
     // Устанавливаем состояние ожидания конфигурации
@@ -7,7 +9,7 @@ export function config(bot) {
     let configId = "";
     if (ctx.session.waitingForConfig) {
       // Получаем введенную конфигурацию
-      const config = ctx.from.username;
+      const config = `${ctx.from.username}_${uuidv4()}`;
 
       // Отправляем запрос на ваш API
       try {

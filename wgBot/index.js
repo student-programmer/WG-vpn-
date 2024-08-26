@@ -5,7 +5,7 @@ import { startCommand } from "./scenes/commands/start.js";
 import { config } from "./scenes/module/config.js";
 
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
+export const bot = new Telegraf(process.env.BOT_TOKEN);
 
 
 const sessions = {};

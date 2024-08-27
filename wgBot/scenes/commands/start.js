@@ -24,7 +24,7 @@ export async function startCommand(ctx) {
       ctx.answerCbQuery();
       ctx.deleteMessage();
       ctx.reply(
-		"Подпишитесь на наш ТГ канал, чтобы получить бесплатный конфиг (https://t.me/Status200PostOk). После подписки нажмите кнопку ниже.",
+		"Подпишитесь на наш ТГ канал, чтобы получить бесплатный конфиг https://t.me/Status200PostOk. После подписки нажмите кнопку ниже.",
 		Markup.inlineKeyboard([
 		  Markup.button.callback("Я подписался", "check_membership"),
 		]),

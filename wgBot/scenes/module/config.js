@@ -32,10 +32,10 @@ export function config(bot) {
         if (data.success) {
           ctx.reply("Конфиг добавлен. Высылаю конфиг...");
         } else {
-          ctx.reply("Failed to add configuration.");
+          ctx.reply("Не удалось добавить конфигурацию.");
         }
       } catch (error) {
-        ctx.reply("An error occurred while adding configuration.");
+        ctx.reply("Произошла ошибка при добавлении конфигурации.");
       }
 
       try {
@@ -57,8 +57,8 @@ export function config(bot) {
         console.log(error);
       }
 
-      bot.on((ctx) => {
-        ctx.reply("Thanks for your response.");
+      bot.on("message", (ctx) => {
+        ctx.reply("Спасибо за ваш ответ.");
       });
 
       const getConfigById = async () => {
@@ -74,6 +74,7 @@ export function config(bot) {
           console.log(error);
         }
       };
+
       const createFileForSend = async () => {
         const configData = await getConfigById();
         if (configData) {
@@ -88,7 +89,7 @@ export function config(bot) {
               .resize()
           );
         } else {
-          ctx.reply("Failed to retrieve the configuration.");
+          ctx.reply("Не удалось получить конфигурацию.");
         }
       };
 

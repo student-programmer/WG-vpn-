@@ -3,7 +3,7 @@ export function download(bot) {
 	bot.command('download_wireguard', async ctx => {
 		ctx.reply(
 			'Перед использованием конфига, скачайте приложение WireGuard 👇',
-			Markup.inlineKeyboard(
+			Markup.inlineKeyboard([ 
 				[
 					Markup.button.url(
 						'IPhone (App Store)',
@@ -24,7 +24,7 @@ export function download(bot) {
 				],
 				[Markup.button.url('Windows', 'https://www.wireguard.com/install/')],
 				[Markup.button.callback('✅ Скачал - Сделать конфиг', 'make_config')]
-			),
+			]),
 			{ parse_mode: 'Markdown' }
 		);
 	});

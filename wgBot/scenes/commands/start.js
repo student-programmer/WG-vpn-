@@ -22,6 +22,7 @@ export async function startCommand(ctx) {
 					.oneTime()
 					.resize()
 			);
+			ctx.answerCbQuery();
 		} else {
 			ctx.answerCbQuery();
 			ctx.deleteMessage();

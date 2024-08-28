@@ -3,10 +3,13 @@ dotenv.config();
 import { Telegraf } from 'telegraf';
 import { startCommand } from './scenes/commands/start.js';
 import { config } from './scenes/module/config.js';
+import { download } from './scenes/commands/doownload.js';
 
 export const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const sessions = {};
+
+
 
 bot.use((ctx, next) => {
 	if (ctx.from && ctx.from.id) {
@@ -23,6 +26,7 @@ bot.use((ctx, next) => {
 bot.start(startCommand);
 
 config(bot);
+download(bot)
 
 bot
 	.launch()

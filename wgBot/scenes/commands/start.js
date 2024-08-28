@@ -2,7 +2,7 @@ import { Markup } from "telegraf";
 import  {bot}  from "../../index.js";
 
 export async function startCommand(ctx) {
-  const chanelId = "@Status200PostOk";
+  const chanelId = "@wireguardvpntop";
   const member = await ctx.telegram.getChatMember(chanelId, ctx.from.id);
 
 
@@ -24,7 +24,7 @@ export async function startCommand(ctx) {
       ctx.answerCbQuery();
       ctx.deleteMessage();
       ctx.reply(
-		"Подпишитесь на наш ТГ канал, чтобы получить бесплатный конфиг https://t.me/Status200PostOk. После подписки нажмите кнопку ниже.",
+		"Подпишитесь на наш ТГ канал, чтобы получить бесплатный конфиг https://t.me/wireguardvpntop. После подписки нажмите кнопку ниже.",
 		Markup.inlineKeyboard([
 		  Markup.button.callback("Я подписался", "check_membership"),
 		]),
@@ -46,7 +46,7 @@ export async function startCommand(ctx) {
     );
   } else {
     ctx.reply(
-      "Подпишитесь на наш ТГ канал, чтобы получить бесплатный конфиг (https://t.me/Status200PostOk). После подписки нажмите кнопку ниже.",
+      "Подпишитесь на наш ТГ канал, чтобы получить бесплатный конфиг https://t.me/wireguardvpntop. После подписки нажмите кнопку ниже.",
       Markup.inlineKeyboard([
         Markup.button.callback("Я подписался", "check_membership"),
       ]),
@@ -54,3 +54,4 @@ export async function startCommand(ctx) {
     );
   }
 }
+

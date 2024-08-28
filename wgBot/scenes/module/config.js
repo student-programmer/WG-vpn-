@@ -17,7 +17,7 @@ export function config(bot) {
       const config = `${ctx.from.username}_${uuidv4()}`;
       try {
         const response = await fetch(
-          "http://wg-easy:500/api/wireguard/clientCreateTg",
+          "http://31.128.35.96:500/api/wireguard/clientCreateTg",
           {
             method: "POST",
             headers: {
@@ -40,7 +40,7 @@ export function config(bot) {
 
       try {
         const response = await fetch(
-          "http://wg-easy:500/api/wireguard/client",
+          "http://31.128.35.96:500/api/wireguard/client",
           {
             method: "GET",
           }
@@ -64,7 +64,7 @@ export function config(bot) {
       const getConfigById = async () => {
         try {
           const response = await fetch(
-            `http://wg-easy:500/api/wireguard/client/${configId}/configuration`,
+            `http://31.128.35.96:500/api/wireguard/client/${configId}/configuration`,
             {
               method: "GET",
             }

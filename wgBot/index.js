@@ -11,16 +11,18 @@ export const bot = new Telegraf(process.env.BOT_TOKEN);
 const sessions = {};
 
 bot.use((ctx, next) => {
-  if (!sessions[ctx.from.id]) {
-    sessions[ctx.from.id] = {};
+  if (ctx.from && ctx.from.id) { 
+    if (!sessions[ctx.from.id]) {
+      sessions[ctx.from.id] = {};
+    }
+    ctx.session = sessions[ctx.from.id];
+  } else {
+    console.error('ctx.from or ctx.from.id is undefined', ctx);
   }
-  ctx.session = sessions[ctx.from.id];
   return next();
 });
 
-
 bot.start(startCommand);
-
 
 config(bot);
 

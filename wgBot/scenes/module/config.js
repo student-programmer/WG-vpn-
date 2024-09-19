@@ -16,6 +16,11 @@ export function config(bot) {
 	});
 
 	bot.hears('Сделать конфиг', async ctx => {
+		if (!ctx.from || !ctx.from.id) {
+			console.log('Получено сообщение не от пользователя.');
+			return;
+		}
+
 		ctx.session.waitingForConfig = true;
 		let configId = '';
 		if (ctx.session.waitingForConfig) {
@@ -66,16 +71,6 @@ export function config(bot) {
 				console.error('Ошибка при получении списка конфигураций:', error);
 				ctx.reply('Произошла ошибка при получении списка конфигураций.');
 			}
-
-			// Обработчик для сообщения от пользователя
-			bot.on('message', ctx => {
-				try {
-					ctx.reply('Спасибо за ваш ответ.');
-				} catch (error) {
-					console.error('Ошибка при отправке ответа:', error);
-					ctx.reply('Произошла ошибка при обработке сообщения.');
-				}
-			});
 
 			// Функция для получения конфигурации по ID
 			const getConfigById = async () => {

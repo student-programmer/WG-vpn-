@@ -4,11 +4,22 @@ import { bot } from '../../index.js';
 export async function startCommand(ctx) {
 	const chanelId = '@wireguardvpntop';
 
+	// Проверяем наличие ctx.from
+	if (!ctx.from || !ctx.from.id) {
+		console.log('Ошибка: ctx.from не определён.');
+		return;
+	}
+
 	try {
 		const member = await ctx.telegram.getChatMember(chanelId, ctx.from.id);
 
 		// Обработчик для кнопки "Я подписался"
 		bot.action('check_membership', async ctx => {
+			if (!ctx.from || !ctx.from.id) {
+				console.log('Ошибка: ctx.from не определён.');
+				return;
+			}
+
 			try {
 				const memberAction = await ctx.telegram.getChatMember(
 					chanelId,
@@ -39,7 +50,6 @@ export async function startCommand(ctx) {
 					);
 				}
 			} catch (error) {
-				// Обработка ошибки, если пользователь заблокировал бота
 				if (error.response && error.response.error_code === 403) {
 					console.log(`Пользователь ${ctx.from.id} заблокировал бота.`);
 				} else {
@@ -70,7 +80,6 @@ export async function startCommand(ctx) {
 			);
 		}
 	} catch (error) {
-		// Обработка ошибки при запросе информации о пользователе
 		if (error.response && error.response.error_code === 403) {
 			console.log(`Пользователь ${ctx.from.id} заблокировал бота.`);
 		} else {

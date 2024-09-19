@@ -3,18 +3,56 @@ import { bot } from '../../index.js';
 
 export async function startCommand(ctx) {
 	const chanelId = '@wireguardvpntop';
-	const member = await ctx.telegram.getChatMember(chanelId, ctx.from.id);
 
-	bot.action('check_membership', async ctx => {
-		const memberAction = await ctx.telegram.getChatMember(
-			chanelId,
-			ctx.from.id
-		);
+	try {
+		const member = await ctx.telegram.getChatMember(chanelId, ctx.from.id);
 
+		// Обработчик для кнопки "Я подписался"
+		bot.action('check_membership', async ctx => {
+			try {
+				const memberAction = await ctx.telegram.getChatMember(
+					chanelId,
+					ctx.from.id
+				);
+
+				if (
+					memberAction.status === 'member' ||
+					memberAction.status === 'administrator' ||
+					memberAction.status === 'creator'
+				) {
+					ctx.reply(
+						'Нажмите сделать конфиг',
+						Markup.keyboard([['Сделать конфиг']])
+							.oneTime()
+							.resize()
+					);
+					ctx.answerCbQuery();
+				} else {
+					ctx.answerCbQuery();
+					ctx.deleteMessage();
+					ctx.reply(
+						'Подпишитесь на наш ТГ канал, чтобы получить бесплатный конфиг https://t.me/wireguardvpntop. После подписки нажмите кнопку ниже.',
+						Markup.inlineKeyboard([
+							Markup.button.callback('Я подписался', 'check_membership'),
+						]),
+						{ parse_mode: 'Markdown' }
+					);
+				}
+			} catch (error) {
+				// Обработка ошибки, если пользователь заблокировал бота
+				if (error.response && error.response.error_code === 403) {
+					console.log(`Пользователь ${ctx.from.id} заблокировал бота.`);
+				} else {
+					console.error('Ошибка в check_membership:', error);
+				}
+			}
+		});
+
+		// Проверка подписки при старте команды
 		if (
-			memberAction.status === 'member' ||
-			memberAction.status === 'administrator' ||
-			memberAction.status === 'creator'
+			member.status === 'member' ||
+			member.status === 'administrator' ||
+			member.status === 'creator'
 		) {
 			ctx.reply(
 				'Нажмите сделать конфиг',
@@ -22,10 +60,7 @@ export async function startCommand(ctx) {
 					.oneTime()
 					.resize()
 			);
-			ctx.answerCbQuery();
 		} else {
-			ctx.answerCbQuery();
-			ctx.deleteMessage();
 			ctx.reply(
 				'Подпишитесь на наш ТГ канал, чтобы получить бесплатный конфиг https://t.me/wireguardvpntop. После подписки нажмите кнопку ниже.',
 				Markup.inlineKeyboard([
@@ -34,26 +69,12 @@ export async function startCommand(ctx) {
 				{ parse_mode: 'Markdown' }
 			);
 		}
-	});
-
-	if (
-		member.status === 'member' ||
-		member.status === 'administrator' ||
-		member.status === 'creator'
-	) {
-		ctx.reply(
-			'Нажмите сделать конфиг',
-			Markup.keyboard([['Сделать конфиг']])
-				.oneTime()
-				.resize()
-		);
-	} else {
-		ctx.reply(
-			'Подпишитесь на наш ТГ канал, чтобы получить бесплатный конфиг https://t.me/wireguardvpntop. После подписки нажмите кнопку ниже.',
-			Markup.inlineKeyboard([
-				Markup.button.callback('Я подписался', 'check_membership'),
-			]),
-			{ parse_mode: 'Markdown' }
-		);
+	} catch (error) {
+		// Обработка ошибки при запросе информации о пользователе
+		if (error.response && error.response.error_code === 403) {
+			console.log(`Пользователь ${ctx.from.id} заблокировал бота.`);
+		} else {
+			console.error('Ошибка в startCommand:', error);
+		}
 	}
 }

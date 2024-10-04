@@ -206,7 +206,7 @@ ${client.preSharedKey ? `PresharedKey = ${client.preSharedKey}\n` : ''
     return `
 [Interface]
 PrivateKey = ${client.privateKey ? `${client.privateKey}` : 'REPLACE_ME'}
-Address = ${client.address}/24
+Address = ${client.address}/16
 ${WG_DEFAULT_DNS ? `DNS = ${WG_DEFAULT_DNS}\n` : ''}\
 ${WG_MTU ? `MTU = ${WG_MTU}\n` : ''}\
 
@@ -241,19 +241,26 @@ Endpoint = ${WG_HOST}:${WG_CONFIG_PORT}`;
 
     // Calculate next IP
     let address;
-    for (let i = 2; i < 255; i++) {
+    for (let i = 2; i < 65535; i++) {
+      // Больше IP-адресов
       const client = Object.values(config.clients).find((client) => {
-        return client.address === WG_DEFAULT_ADDRESS.replace('x', i);
+        return (
+          client.address ===
+          WG_DEFAULT_ADDRESS.replace("x.x", `${Math.floor(i / 256)}.${i % 256}`)
+        );
       });
 
       if (!client) {
-        address = WG_DEFAULT_ADDRESS.replace('x', i);
+        address = WG_DEFAULT_ADDRESS.replace(
+          "x.x",
+          `${Math.floor(i / 256)}.${i % 256}`
+        );
         break;
       }
     }
 
     if (!address) {
-      throw new Error('Maximum number of clients reached.');
+      throw new Error("Maximum number of clients reached.");
     }
 
     // Create Client

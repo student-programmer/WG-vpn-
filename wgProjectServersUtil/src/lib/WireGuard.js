@@ -257,21 +257,17 @@ Endpoint = ${WG_HOST}:${WG_CONFIG_PORT}`;
 
     // Calculate next IP
     let address;
-    for (let i = 2; i < 65535; i++) {
-      // Больше IP-адресов
-      const client = Object.values(config.clients).find((client) => {
-        return (
-          client.address ===
-          WG_DEFAULT_ADDRESS.replace("x.x", `${Math.floor(i / 256)}.${i % 256}`)
-        );
-      });
+    outerLoop: for (let i = 2; i < 255; i++) {
+      for (let j = 1; j < 255; j++) {
+        const potentialAddress = WG_DEFAULT_ADDRESS.replace("x", `${i}.${j}`);
+        const client = Object.values(config.clients).find((client) => {
+          return client.address === potentialAddress;
+        });
 
-      if (!client) {
-        address = WG_DEFAULT_ADDRESS.replace(
-          "x.x",
-          `${Math.floor(i / 256)}.${i % 256}`
-        );
-        break;
+        if (!client) {
+          address = potentialAddress;
+          break outerLoop;
+        }
       }
     }
 

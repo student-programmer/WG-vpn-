@@ -1,95 +1,125 @@
-import fetch from "node-fetch";
-import fs from "fs";
+import fetch from 'node-fetch';
+import fs from 'fs';
+import { Markup } from 'telegraf';
+import { v4 as uuidv4 } from 'uuid';
+
 export function config(bot) {
-  bot.hears("Сделать конфиг", async (ctx) => {
-    // Устанавливаем состояние ожидания конфигурации
-    ctx.session.waitingForConfig = true;
-    let configId = "";
-    if (ctx.session.waitingForConfig) {
-      // Получаем введенную конфигурацию
-      const config = ctx.from.username;
+	bot.hears('Инструкция', async ctx => {
+		try {
+			ctx.reply(
+				'Инструкцию вы найдете здесь https://lastseenvpn.gitbook.io/vpn-setup-guide/tutorial/ustanovka-i-nastroika-vpn/wireguard'
+			);
+		} catch (error) {
+			console.error('Ошибка при отправке инструкции:', error);
+			ctx.reply('Произошла ошибка при отправке инструкции.');
+		}
+	});
 
-      // Отправляем запрос на ваш API
-      try {
-        const response = await fetch(
-          "http://wg-easy:500/api/wireguard/clientCreateTg",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ name: config }),
-          }
-        );
+	bot.hears('Сделать конфиг', async ctx => {
+		if (!ctx.from || !ctx.from.id) {
+			console.log('Получено сообщение не от пользователя.');
+			return;
+		}
 
-        const data = await response.json();
+		ctx.session.waitingForConfig = true;
+		let configId = '';
+		if (ctx.session.waitingForConfig) {
+			const config = `${ctx.from.username}_${uuidv4()}`;
 
-        if (data.success) {
-          ctx.reply("Конфиг добавлен. Высылаю конфиг...");
-        } else {
-          ctx.reply("Failed to add configuration.");
-        }
-      } catch (error) {
-        ctx.reply("An error occurred while adding configuration.");
-      }
+			try {
+				// Отправка запроса на создание конфига
+				const response = await fetch(
+					'http://31.128.35.96:500/api/wireguard/clientCreateTg',
+					{
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({ name: config }),
+					}
+				);
 
-      try {
-        const response = await fetch(
-          "http://wg-easy:500/api/wireguard/client",
-          {
-            method: "GET",
-          }
-        );
-        const data = await response.json();
+				const data = await response.json();
 
-        data.map((item) => {
-          if (item.name === config) {
-            configId = item.id;
-            return;
-          }
-        });
-      } catch (error) {
-        console.log(error);
-      }
+				if (data.success) {
+					ctx.reply('Конфиг добавлен. Высылаю конфиг...');
+				} else {
+					ctx.reply('Не удалось добавить конфигурацию.');
+				}
+			} catch (error) {
+				console.error('Ошибка при добавлении конфигурации:', error);
+				ctx.reply('Произошла ошибка при добавлении конфигурации.');
+			}
 
-      bot.on((ctx) => {
-        ctx.reply("Thanks for your response.");
-      });
+			try {
+				// Запрос всех клиентов WireGuard
+				const response = await fetch(
+					'http://31.128.35.96:500/api/wireguard/client',
+					{
+						method: 'GET',
+					}
+				);
+				const data = await response.json();
 
-      const getConfigById = async () => {
-        try {
-          const response = await fetch(
-            `http://wg-easy:500/api/wireguard/client/${configId}/configuration`,
-            {
-              method: "GET",
-            }
-          );
-          return response.text();
-        } catch (error) {
-          console.log(error);
-        }
-      };
-      const createFileForSend = async () => {
-        const configData = await getConfigById();
-        if (configData) {
-          const filePath = "./config.conf";
+				data.map(item => {
+					if (item.name === config) {
+						configId = item.id;
+						return;
+					}
+				});
+			} catch (error) {
+				console.error('Ошибка при получении списка конфигураций:', error);
+				ctx.reply('Произошла ошибка при получении списка конфигураций.');
+			}
 
-          // Создание файла с конфигурацией
-          fs.writeFileSync(filePath, configData);
+			// Функция для получения конфигурации по ID
+			const getConfigById = async () => {
+				try {
+					const response = await fetch(
+						`http://31.128.35.96:500/api/wireguard/client/${configId}/configuration`,
+						{
+							method: 'GET',
+						}
+					);
+					return response.text();
+				} catch (error) {
+					console.error(
+						`Ошибка при получении конфигурации с ID ${configId}:`,
+						error
+					);
+					return null;
+				}
+			};
 
-          // Отправка файла в Telegram
-          await ctx.replyWithDocument({ source: filePath });
+			// Функция для создания и отправки файла конфигурации
+			const createFileForSend = async () => {
+				try {
+					const configData = await getConfigById();
+					if (configData) {
+						const filePath = './config.conf';
+						fs.writeFileSync(filePath, configData); // Сохранение файла
+						await ctx.replyWithDocument({ source: filePath }); // Отправка файла пользователю
+						fs.unlinkSync(filePath); // Удаление файла после отправки
 
-          // Удаление файла после отправки (необязательно)
-          fs.unlinkSync(filePath);
-        } else {
-          ctx.reply("Failed to retrieve the configuration.");
-        }
-      };
+						ctx.reply(
+							'Вы можете посмотреть инструкцию',
+							Markup.keyboard([['Инструкция']])
+								.oneTime()
+								.resize()
+						);
+					} else {
+						ctx.reply('Не удалось получить конфигурацию.');
+					}
+				} catch (error) {
+					console.error('Ошибка при создании или отправке файла:', error);
+					ctx.reply('Произошла ошибка при создании или отправке конфигурации.');
+				}
+			};
 
-      createFileForSend();
+			// Вызов функции для создания и отправки конфигурации
+			createFileForSend();
 
-      ctx.session.waitingForConfig = false;
-    }
-  });
+			ctx.session.waitingForConfig = false;
+		}
+	});
 }
